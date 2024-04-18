@@ -1,0 +1,21 @@
+{
+    "servers": {
+        "ip_address": {
+            "US": ["1i, 2i, 3i"],
+            "Europe": ["1i,2i,3i"],
+            "Asia": ["1i,2i,3i"]
+        },
+        "dns": {
+            "US": ["1d,2d,3d"],
+            "Europe": ["1d,2d,3d"],
+            "Asia": ["1d,2d,3d"]
+        },
+        "url": {
+            "US": ["1u,2u,3u"],
+            "Europe": ["1u,2u,3u"],
+            "Asia": ["1u,2u,3u"]
+        },
+        "port": [200, 300, 400]
+    },
+    "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP"]
+}
