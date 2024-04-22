@@ -16,12 +16,11 @@ def tcp_client(message: str):
         sock.connect((server_address, server_port))
 
         # Send Data:
-        print(f"Sending: {message}")
         sock.sendall(message.encode())
 
         # Receive Data:
         response = sock.recv(1024)
-        print(f"Received: {response.decode()}")
+        return response.decode()
 
     finally:
         # Close the Connection:

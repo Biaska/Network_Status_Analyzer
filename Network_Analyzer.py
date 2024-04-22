@@ -10,7 +10,7 @@ import sys
 import os
 import re
 from applescript import tell
-from timestamp_printing_example import timestamped_print
+from timestamp_printing import timestamped_print
 from network_monitoring_functions import ping, traceroute, check_server_http, check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port, check_udp_port, check_echo_server
 
 config_options = {
@@ -19,7 +19,9 @@ config_options = {
             "http": ['http://google.com', 'http://adobe.com', 'http://youtube.com'],
             "https": ['https://google.com', 'https://adobe.com', 'https://youtube.com'],
             "hostname": ["google.com", "adobe.com", "youtube.com"],
-            "port": [200, 300, 400]
+            "port": [200, 300, 400],
+            'dns': [('Google DNS', '8.8.8.8'), ('Cloudfare DNS', '1.1.1.1'), ('Quad9DNS', '9.9.9.9'), ('OpenDNS', '208.67.222.222')],
+            'dns_types': ['A', 'MX', 'AAAA', 'CNAME']
         },
         "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
     }
@@ -129,6 +131,12 @@ def delete_config_option():
 
 
 def print_config_list(list: list, new=False):
+    """
+    Print list of options from the config list.
+
+    :param list: list of options from the config object
+    :param new: boolean that indicates to prompt to create a new option.
+    """
     print('\n')
     for i in range(len(list)):
         print(f"\t\t\t{str(i+1)}. {list[i]}")
@@ -142,6 +150,9 @@ def print_selected_config():
         print(f"===== Service {i+1} =====")
         print(f"\nService to be tested: {global_config[i]['service']}")
         print(f"Target server: {global_config[i]["server"]}")
+        if 'dns' in global_config[i]:
+            print(f'Public DNS: {global_config[i]['dns']}')
+            print(f'Domain record type: {global_config[i]['dns_type']}')
         if "port" in global_config[i]:
             print(f'Port number: {global_config[i]['port']}')
         if "timeout" in global_config[i]:
@@ -200,6 +211,8 @@ def select_from_config_list(list, create_new=None, new_option=False):
     :param create_new: function to create a new option
     :param new_option: boolean to indicate if a create new option should be
     printed to screen
+
+    :return option: returns the option selected by the user
     """
 
     print_config_list(list, new_option)
@@ -207,13 +220,19 @@ def select_from_config_list(list, create_new=None, new_option=False):
     option = 0
     if new_option:
         while option < 1 or option > len(list)+1:
-            option = int(input('Enter a number: '))
+            try:
+                option = int(input('Enter a number: '))
+            except ValueError:
+                print("Invalid inout.")
             if option < 1 or option > len(list)+1:
                 print("Invalid input.")
 
     else:
         while option < 1 or option > len(list):
-            option = int(input("Enter a number: "))
+            try:
+                option = int(input("Enter a number: "))
+            except ValueError:
+                print("Invalid input.")
             if option < 1 or option > len(list):
                 print("Invalid input.")
 
@@ -300,24 +319,16 @@ def select_DNS(config: object):
 
     :param config: Current config object to be updated by the selection.
     """
-    print("""IP Address or hostname?
+    # Select Host Name
+    config = select_hostname(config)
 
-          1. IP Address
-          2. Hostname
+    dns = config_options['servers']['dns']
+    print("Select a DNS: ")
+    config['dns'] = select_from_config_list(dns)
 
-          """)
-
-    target = 0
-    while target < 1 or target > 2:
-        target = int(input("Select a number: "))
-
-        # Select IP Address
-        if target == 1:
-            config = select_IP(config)
-
-        # Select Host Name
-        if target == 2:
-            config = select_hostname(config)
+    dns_types = config_options['servers']['dns_types']
+    print("Select a DNS type: ")
+    config['dns_type'] = select_from_config_list(dns_types)
 
     return config
 
@@ -570,34 +581,44 @@ def worker(stop_event: threading.Event, config: object) -> None:
     """
     Prints a message every 5 seconds until stop_event is set.
     """
+    server, service = config['server'], config['service']
     while not stop_event.is_set():
 
         match config['service']:
 
+            # Run HTTP Tests
             case 'HTTP':
-                response = check_server_http(config['server'])
+                success, code = check_server_http(server)
                 timestamped_print(
-                    f"{config['service']} test - {"PASS" if response[0] else "FAIL"}: server: {config['server']} code: {response[1]}")
+                    f"{service:<6}| {"PASS" if success else "FAIL"} - (server: {server} code: {code})")
 
+            # Run HTTPS Tests
             case 'HTTPS':
-                response = check_server_https(config['server'], config['timeout'])
-                timestamped_print(f"{config['service']} test - {"PASS" if response[0] else "FAIL"}: server: {config['server']} code: {response[1]} message: {response[2]}")
+                success, code, message = check_server_https(server, config['timeout'])
+                timestamped_print(f"{service:<6}| {"PASS" if success else "FAIL"} - (server: {server} code: {code} message: {message})")
 
+            # Run ICMP Tests
             case 'ICMP':
-                response = ping(config['server'], 64, config['timeout'])
-                timestamped_print(f"{config['service']} test - {"PASS" if response[0] else "FAIL"}: server: {config['server']} reply-address: {response[0]} time: {response[1]}")
+                reply_address, response_time = ping(config['server'], 64, config['timeout'])
+                timestamped_print(f"{service:<6}| {"PASS" if response_time else "FAIL"} - (server: {server} reply-address: {reply_address} time: {response_time})")
 
             case 'DNS':
-                timestamped_print("Test DNS")
+                status, results = check_dns_server_status(config['dns'][1], config['server'], config['dns_type'])
+                timestamped_print(f"{service:<6}| {"PASS" if status else "FAIL"} - ({config['dns'][0]}[{config['dns_type']}]  query: {server} results: {results})")
+
             case 'NTP':
-                timestamped_print("Test NTP")
+                status, _ = check_ntp_server(config['server'])
+                timestamped_print(f"{service:<6}| {"PASS" if status else "FAIL"} - (server-status: {server} {"is up." if status else "is down."})")
 
             case 'TCP':
-                timestamped_print("Test TCP")
+                status, message = check_tcp_port(config['server'], config['port'])
+                timestamped_print(f"{service:<6}| {"PASS" if status else "FAIL"} - (response-description: {message})")
             case 'UDP':
-                timestamped_print("Test UDP")
+                status, message = check_tcp_port(config['server'], config['port'])
+                timestamped_print(f"{service:<6}| {"PASS" if status else "FAIL"} - (response-description: {message})")
             case 'ECHO':
-                timestamped_print("Test ECHO")
+                message = tcp_client('Echo test.')
+                timestamped_print(f"{service:<6}| {"PASS" if message else "FAIL"} - (server-message: {message})")
 
         time.sleep(config['time'])
         pass
@@ -674,7 +695,8 @@ def main():
                         print_commands()
 
     except KeyboardInterrupt:
-        tcp_client('exit')
+        message = tcp_client('exit')
+        print(message)
 
     finally:
         # Signal the worker thread to stop and wait for its completion
