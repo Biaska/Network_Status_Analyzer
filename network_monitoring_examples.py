@@ -464,7 +464,7 @@ print(traceroute("8.8.8.8"))
 
 # HTTP/HTTPS Usage Examples
 print("\nHTTP/HTTPS Examples:")
-http_url = "http://example.com"
+http_url = "http://google.com"
 http_server_status, http_server_response_code = check_server_http(http_url)
 print(f"HTTP URL: {http_url}, HTTP server status: {http_server_status}, Status Code: {http_server_response_code if http_server_response_code is not None else 'N/A'}")
 

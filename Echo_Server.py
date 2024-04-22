@@ -1,4 +1,14 @@
 import socket
+import signal
+import os
+import sys
+
+
+def close_terminal():
+    # macOS command to close the terminal window
+    if sys.platform.startswith('darwin'):
+        print('closing terminal')
+        os.system('osascript -e \'tell application "Terminal" to close first window\'')
 
 
 def tcp_echo_server():
@@ -38,7 +48,7 @@ def tcp_echo_server():
                         raise KeyboardInterrupt
 
                     case _:
-                        response = "Message received"
+                        response = "Echo server running."
                         client_sock.sendall(response.encode())
 
             finally:
@@ -53,6 +63,7 @@ def tcp_echo_server():
         # Close Server Socket:
         server_sock.close()
         print("Server socket was closed")
+        close_terminal()
 
 
 if __name__ == "__main__":

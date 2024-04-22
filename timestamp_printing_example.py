@@ -16,7 +16,3 @@ def timestamped_print(*args, **kwargs):
 
     # Print the timestamp followed by the original message
     print(f"[{timestamp}]: ", *args, **kwargs)
-
-
-# Example usage
-timestamped_print("Hello, world!")
