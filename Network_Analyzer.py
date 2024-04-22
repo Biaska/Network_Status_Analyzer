@@ -86,18 +86,6 @@ def print_commands():
     print(commands)
 
 
-def set_config(service: str, server: str, time: int):
-    """
-        Sets the configuration details and returns the config object.
-    """
-    config = {
-        "service": service,
-        "server": server,
-        "time": time,
-    }
-    return config
-
-
 def set_time_interval(config):
     """
     Prompts user to enter a new time interval for each test.
@@ -118,6 +106,9 @@ def set_time_interval(config):
 
 
 def delete_config_option():
+    """
+    Prompts user to delete configuration object from the global config.
+    """
     print_selected_config()
     service = -1
     while service < 0 or service > len(global_config):
@@ -146,6 +137,10 @@ def print_config_list(list: list, new=False):
 
 
 def print_selected_config():
+    """
+    Prints the current global config objects.
+    """
+
     for i in range(len(global_config)):
         print(f"===== Service {i+1} =====")
         print(f"\nService to be tested: {global_config[i]['service']}")
@@ -161,6 +156,9 @@ def print_selected_config():
 
 
 def set_config_sequence():
+    """
+    Creates a new config object by getting user input. 
+    """
     config = {}
 
     # Get service index from user and check for valid input
