@@ -48,7 +48,7 @@ def tcp_echo_server():
                         raise KeyboardInterrupt
 
                     case _:
-                        response = "Echo server running."
+                        response = f"Echo server running. Message received: {message}"
                         client_sock.sendall(response.encode())
 
             finally:
