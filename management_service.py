@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+import socket
 import threading
 import time
 from Echo_Client import tcp_client
@@ -50,7 +50,6 @@ default_config = [{
     }]
 
 global_config = default_config
-
 
 def banner():
     banner = """
@@ -624,7 +623,7 @@ def worker(stop_event: threading.Event, config: object) -> None:
         pass
 
 
-def main():
+def command_line_handler():
     """
     Main function to handle user input and manage threads.
     Uses prompt-toolkit for handling user input with auto-completion and 
@@ -687,7 +686,7 @@ def main():
 
                     case 'exit':
                         print("Exiting application...")
-                        tcp_client('exit')
+                        start_client('exit')
                         is_running = False
 
                     case _:
@@ -706,5 +705,31 @@ def main():
                 worker_thread.join()
 
 
+# TCP Client used to contact TCP Server
+def start_client(message: str):
+
+    # Assign server and port
+    server_address = '127.0.0.1'
+    server_port = 12345
+
+    # Create a Socket:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        # Establish a Connection:
+        sock.connect((server_address, server_port))
+
+        # Send Data:
+        sock.sendall(message.encode())
+
+        # Receive Data:
+        response = sock.recv(1024)
+        return response.decode()
+
+    finally:
+        # Close the Connection:
+        sock.close()
+
+
 if __name__ == "__main__":
-    main()
+    command_line_handler()
