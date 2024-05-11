@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import json
 from Echo_Client import tcp_client
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
@@ -13,43 +14,44 @@ from applescript import tell
 from timestamp_printing import timestamped_print
 from network_monitoring_functions import ping, traceroute, check_server_http, check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port, check_udp_port, check_echo_server
 
-config_options = {
-        "servers": {
-            "ip_address": ["8.8.8.8", "23.41.4.216", "142.251.33.110"],
-            "http": ['http://google.com', 'http://adobe.com', 'http://youtube.com'],
-            "https": ['https://google.com', 'https://adobe.com', 'https://youtube.com'],
-            "hostname": ["google.com", "adobe.com", "youtube.com"],
-            "port": [200, 300, 400],
-            'dns': [('Google DNS', '8.8.8.8'), ('Cloudfare DNS', '1.1.1.1'), ('Quad9DNS', '9.9.9.9'), ('OpenDNS', '208.67.222.222')],
-            'dns_types': ['A', 'MX', 'AAAA', 'CNAME']
-        },
-        "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
-    }
+# config_options = {
+#         "servers": {
+#             "ip_address": ["8.8.8.8", "23.41.4.216", "142.251.33.110"],
+#             "http": ['http://google.com', 'http://adobe.com', 'http://youtube.com'],
+#             "https": ['https://google.com', 'https://adobe.com', 'https://youtube.com'],
+#             "hostname": ["google.com", "adobe.com", "youtube.com"],
+#             "port": [200, 300, 400],
+#             'dns': [('Google DNS', '8.8.8.8'), ('Cloudfare DNS', '1.1.1.1'), ('Quad9DNS', '9.9.9.9'), ('OpenDNS', '208.67.222.222')],
+#             'dns_types': ['A', 'MX', 'AAAA', 'CNAME']
+#         },
+#         "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
+#     }
 
 
-default_config = [{
-        "service": config_options['services'][2],
-        "server": config_options['servers']['ip_address'][0],
-        "timeout": 1,
-        "time": 2
-    }, {
-        "service": config_options["services"][1],
-        "server": config_options["servers"]['https'][0],
-        "timeout": 2,
-        "time": 3
-    }, {
-        "service": config_options["services"][6],
-        "server": config_options['servers']['ip_address'][2],
-        "port": 200,
-        "timeout": 4,
-        "time": 5
-    }, {
-        "service": config_options["services"][7],
-        "server": '127.0.0.1',
-        "time": 5
-    }]
+# default_config = [{
+#         "service": config_options['services'][2],
+#         "server": config_options['servers']['ip_address'][0],
+#         "timeout": 1,
+#         "time": 2
+#     }, {
+#         "service": config_options["services"][1],
+#         "server": config_options["servers"]['https'][0],
+#         "timeout": 2,
+#         "time": 3
+#     }, {
+#         "service": config_options["services"][6],
+#         "server": config_options['servers']['ip_address'][2],
+#         "port": 200,
+#         "timeout": 4,
+#         "time": 5
+#     }, {
+#         "service": config_options["services"][7],
+#         "server": '127.0.0.1',
+#         "time": 5
+#     }]
 
-global_config = default_config
+global_config = {}
+config_options = {}
 
 def banner():
     banner = """
@@ -573,54 +575,50 @@ def start_server_in_new_terminal():
         print("Unsupported platform.")
 
 
-# Worker thread function
-def worker(stop_event: threading.Event, config: object) -> None:
-    """
-    Prints a message every 5 seconds until stop_event is set.
-    """
-    server, service = config['server'], config['service']
-    while not stop_event.is_set():
+def set_config(config: any):
+    # overwrite configuration in management_service_config.json
+    pass
 
-        match config['service']:
 
-            # Run HTTP Tests
-            case 'HTTP':
-                success, code = check_server_http(server)
-                timestamped_print(
-                    f"{service:<6}| {'PASS' if success else 'FAIL'} - (server: {server} code: {code})")
+def get_config():
+    # get config object from management_service_config.json
+    pass
 
-            # Run HTTPS Tests
-            case 'HTTPS':
-                success, code, message = check_server_https(server, config['timeout'])
-                timestamped_print(f"{service:<6}| {'PASS' if success else 'FAIL'} - (server: {server} code: {code} message: {message})")
 
-            # Run ICMP Tests
-            case 'ICMP':
-                reply_address, response_time = ping(config['server'], 64, config['timeout'])
-                timestamped_print(f"{service:<6}| {'PASS' if response_time else 'FAIL'} - (server: {server} reply-address: {reply_address} time: {response_time})")
+def reconnect():
+    # handle reconnecting to the service
+    pass
 
-            case 'DNS':
-                status, results = check_dns_server_status(config['dns'][1], config['server'], config['dns_type'])
-                timestamped_print(f"{service:<6}| {'PASS' if status else 'FAIL'} - ({config['dns'][0]}[{config['dns_type']}]  query: {server} results: {results})")
 
-            case 'NTP':
-                status, _ = check_ntp_server(config['server'])
-                timestamped_print(f"{service:<6}| {'PASS' if status else 'FAIL'} - (server-status: {server} {'is up.' if status else 'is down.'})")
+def handle_monitoring_services():
+    # worker thread that creates and maintains TCP connections to services
+    pass
 
-            case 'TCP':
-                status, message = check_tcp_port(config['server'], config['port'])
-                timestamped_print(f"{service:<6}| {'PASS' if status else 'FAIL'} - (response-description: {message})")
 
-            case 'UDP':
-                status, message = check_tcp_port(config['server'], config['port'])
-                timestamped_print(f"{service:<6}| {'PASS' if status else 'FAIL'} - (response-description: {message})")
+# TCP Client used to contact TCP Server
+def start_client(message: str):
 
-            case 'ECHO':
-                message = tcp_client('Echo test.')
-                timestamped_print(f"{service:<6}| {'PASS' if message else 'FAIL'} - (server-message: {message})")
+    # Assign server and port
+    server_address = '127.0.0.1'
+    server_port = 12345
 
-        time.sleep(config['time'])
-        pass
+    # Create a Socket:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        # Establish a Connection:
+        sock.connect((server_address, server_port))
+
+        # Send Data:
+        sock.sendall(message.encode())
+
+        # Receive Data:
+        response = sock.recv(1024)
+        return response.decode()
+
+    finally:
+        # Close the Connection:
+        sock.close()
 
 
 def command_line_handler():
@@ -634,7 +632,7 @@ def command_line_handler():
 
     banner()
 
-    config = global_config
+    global global_config
 
     # Event to signal the worker thread to stop
     stop_event: threading.Event = threading.Event()
@@ -665,7 +663,7 @@ def command_line_handler():
                         stop_event: threading.Event = threading.Event()
                         for service_config in global_config:
                             worker_thread: threading.Thread = threading.Thread(
-                                target=worker, args=(stop_event, service_config))
+                                target=worker, args=(stop_event, service_config))      # change worker to the service handler
                             worker_thread.start()
 
                     case 'stop':
@@ -703,33 +701,6 @@ def command_line_handler():
             if worker_thread.is_alive():
                 stop_event.set()
                 worker_thread.join()
-
-
-# TCP Client used to contact TCP Server
-def start_client(message: str):
-
-    # Assign server and port
-    server_address = '127.0.0.1'
-    server_port = 12345
-
-    # Create a Socket:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        # Establish a Connection:
-        sock.connect((server_address, server_port))
-
-        # Send Data:
-        sock.sendall(message.encode())
-
-        # Receive Data:
-        response = sock.recv(1024)
-        return response.decode()
-
-    finally:
-        # Close the Connection:
-        sock.close()
-
 
 if __name__ == "__main__":
     command_line_handler()

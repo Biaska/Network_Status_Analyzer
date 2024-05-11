@@ -1,0 +1,36 @@
+{
+    "monitoring_services_list": {},
+    "default_config": [{
+        "service": "ICMP",
+        "server": "8.8.8.8",
+        "timeout": 1,
+        "time": 2
+    }, {
+        "service": "HTTPS",
+        "server": "https://google.com",
+        "timeout": 2,
+        "time": 3
+    }, {
+        "service": "UDP",
+        "server": "142.251.33.110",
+        "port": 200,
+        "timeout": 4,
+        "time": 5
+    }, {
+        "service": "Echo",
+        "server": "127.0.0.1",
+        "time": 5
+    }],
+    "config_options": {
+        "servers": {
+            "ip_address": ["8.8.8.8", "23.41.4.216", "142.251.33.110"],
+            "http": ["http://google.com", "http://adobe.com", "http://youtube.com"],
+            "https": ["https://google.com", "https://adobe.com", "https://youtube.com"],
+            "hostname": ["google.com", "adobe.com", "youtube.com"],
+            "port": [200, 300, 400],
+            "dns": [["Google DNS", "8.8.8.8"], ["Cloudfare DNS", "1.1.1.1"], ["Quad9DNS", "9.9.9.9"], ["OpenDNS", "208.67.222.222"]],
+            "dns_types": ["A", "MX", "AAAA", "CNAME"]
+        },
+        "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
+    }
+}

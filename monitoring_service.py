@@ -4,6 +4,8 @@ import os
 import sys
 import threading
 import time
+import json
+from queue import Queue
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
@@ -13,22 +15,39 @@ from network_monitoring_functions import ping, traceroute, check_server_http, \
     check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port,\
         check_udp_port, check_echo_server
 
+
 # Make this into a json import
 global_config = {}
+service_results = []
+status = "Offline"
+
+def get_config():
+    # get configuration settings from monitoring_service_config.json
+    pass
+
+
+def set_config():
+    # overwrite configuration settings from monitoring_service_config.json
+    pass
+
 
 def create_server_id() -> str:
     # Create a unique server ID
     return ""
 
+
 def print_config():
     # Print the configuration settings to the console
     pass
+
 
 def print_commands():
     # Print the valid command line actions
     pass
 
-# Worker thread function
+
+# Service check thread worker that runs one service check at the configured
+# time frequency
 def service_check(stop_event: threading.Event, config: object) -> None:
     """
     Prints a message every 5 seconds until stop_event is set.
@@ -79,11 +98,19 @@ def service_check(stop_event: threading.Event, config: object) -> None:
 
 
 def handle_client_connection(stop_event: threading.Event, server_sock: socket.socket):
+    """
+    Handles tcp connection from a tcp client. 
+    :param: stop_event = event to stop the service worker
+    :param: server_sock = socket used for tcp connections
+    """
     try:
         while True:
             # Accept Connections
             client_sock, client_address = server_sock.accept()
             print(f"Connection from {client_address}")
+            
+            # TODO
+            # First check for messages. then send all status updates in queue
 
             try:
                 # Receive Data:
@@ -92,12 +119,12 @@ def handle_client_connection(stop_event: threading.Event, server_sock: socket.so
 
                 match message.lower():
 
-                    case "exit":
-                        response = "Shutting down server"
-                        client_sock.sendall(response.encode())
-                        client_sock.close()
-                        print(f"Connection with {client_address} closed")
-                        raise KeyboardInterrupt
+                    # case "exit":
+                    #     response = "Shutting down server"
+                    #     client_sock.sendall(response.encode())
+                    #     client_sock.close()
+                    #     print(f"Connection with {client_address} closed")
+                    #     raise KeyboardInterrupt
                     
                     case "create":
                         # handle creating a new service check
@@ -129,8 +156,11 @@ def handle_client_connection(stop_event: threading.Event, server_sock: socket.so
         print("Server socket was closed")
 
 
-def tcp_server():
-
+def monitoring_service():
+    """
+    Server function to handle main monitoring process.
+    """
+    global status
     # Assign server and port
     server_address = '127.0.0.1'
 
@@ -158,9 +188,13 @@ def tcp_server():
 
     print("Server listening for incoming connections...")
 
+    # Start service worker to handle client connection
     stop_event: threading.Event = threading.Event()
     worker_thread: threading.Thread = threading.Thread(target=handle_client_connection, args=(stop_event, server_sock))
     worker_thread.start()
+
+    # Set config
+    global_config = get_config()
 
     # Command completer for auto-complete
     command_completer: WordCompleter = WordCompleter(
@@ -183,6 +217,8 @@ def tcp_server():
                     case 'start':
                         # Start continuous tests wtih current configuration
                         # Create and start the worker thread
+                        print("Starting service workers.")
+                        status = "Online"
                         stop_event: threading.Event = threading.Event()
                         for service_config in global_config:
                             worker_thread: threading.Thread = threading.Thread(
@@ -190,6 +226,7 @@ def tcp_server():
                             worker_thread.start()
 
                     case 'stop':
+                        status = "Offline"
                         if worker_thread.is_alive():
                             stop_event.set()
                             worker_thread.join()
@@ -217,43 +254,6 @@ def tcp_server():
                 stop_event.set()
                 worker_thread.join()
 
-    # try:
-    #     while True:
-    #         # Accept Connections
-    #         client_sock, client_address = server_sock.accept()
-    #         print(f"Connection from {client_address}")
-
-    #         try:
-    #             # Receive Data:
-    #             message = client_sock.recv(1024).decode()
-    #             print(f"Received message: {message}")
-
-    #             match message.lower():
-
-    #                 case "exit":
-    #                     response = "Shutting down echo server"
-    #                     client_sock.sendall(response.encode())
-    #                     client_sock.close()
-    #                     print(f"Connection with {client_address} closed")
-    #                     raise KeyboardInterrupt
-
-    #                 case _:
-    #                     response = "Server running."
-    #                     client_sock.sendall(response.encode())
-
-    #         finally:
-    #             # Close the Client Connection:
-    #             client_sock.close()
-    #             print(f"Connection with {client_address} closed")
-
-    # except KeyboardInterrupt:
-    #     print("Server is shutting down")
-
-    # finally:
-    #     # Close Server Socket:
-    #     server_sock.close()
-    #     print("Server socket was closed")
-
 
 if __name__ == "__main__":
-    tcp_server()
+    monitoring_service()
