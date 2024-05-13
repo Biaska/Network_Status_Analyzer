@@ -1,164 +1,41 @@
-import socket
-import threading
-import time
-import json
-from Echo_Client import tcp_client
-from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import WordCompleter
-from prompt_toolkit.patch_stdout import patch_stdout
-import subprocess
-import sys
-import os
 import re
-from applescript import tell
-from timestamp_printing import timestamped_print
-from network_monitoring_functions import ping, traceroute, check_server_http, check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port, check_udp_port, check_echo_server
 
-# config_options = {
-#         "servers": {
-#             "ip_address": ["8.8.8.8", "23.41.4.216", "142.251.33.110"],
-#             "http": ['http://google.com', 'http://adobe.com', 'http://youtube.com'],
-#             "https": ['https://google.com', 'https://adobe.com', 'https://youtube.com'],
-#             "hostname": ["google.com", "adobe.com", "youtube.com"],
-#             "port": [200, 300, 400],
-#             'dns': [('Google DNS', '8.8.8.8'), ('Cloudfare DNS', '1.1.1.1'), ('Quad9DNS', '9.9.9.9'), ('OpenDNS', '208.67.222.222')],
-#             'dns_types': ['A', 'MX', 'AAAA', 'CNAME']
-#         },
-#         "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
-#     }
-
-
-# default_config = [{
-#         "service": config_options['services'][2],
-#         "server": config_options['servers']['ip_address'][0],
-#         "timeout": 1,
-#         "time": 2
-#     }, {
-#         "service": config_options["services"][1],
-#         "server": config_options["servers"]['https'][0],
-#         "timeout": 2,
-#         "time": 3
-#     }, {
-#         "service": config_options["services"][6],
-#         "server": config_options['servers']['ip_address'][2],
-#         "port": 200,
-#         "timeout": 4,
-#         "time": 5
-#     }, {
-#         "service": config_options["services"][7],
-#         "server": '127.0.0.1',
-#         "time": 5
-#     }]
-
-global_config = {}
-config_options = {}
-
-def banner():
-    banner = """
-    =====================================================================
-    _  _     _                  _       _             _                 
-    | \\| |___| |___ __ _____ _ _| |__   /_\\  _ _  __ _| |_  _ ______ _ _ 
-    | .` / -_|  _\\ V  V / _ | '_| / /  / _ \\| ' \\/ _` | | || |_ / -_| '_|
-    |_|\\_\\___|\\__|\\_/\\_/\\___|_| |_\\_\\ /_/ \\_|_||_\\__,_|_|\\_, /__\\___|_|
-                                                        |__/
-    =====================================================================
-
-    Analyze network address for response speeds. Run the default
-    configuration, choose a different one, or add more.
-    """
-    print(banner)
-    print_commands()
-
-
-def print_commands():
-    commands = """
-    =====================================================================
-    Commands:
-    =====================================================================
-
-        start: starts continious network tests using the current
-               selected configuration
-        stop: stops continous network tests
-        config: display the current configuration
-        delete: delete a service configuration
-        set: start the sequence to add a new service configuration
-        exit: exit the program
-    """
-    print(commands)
-
-
-def set_time_interval(config):
-    """
-    Prompts user to enter a new time interval for each test.
-    """
-    # Get testing interval for the service
-    time = 0
-    while time < 1:
-        time = input("Enter an interval amount in seconds: ")
-        try:
-            time = int(time)
-            if time < 1:
-                raise ValueError
-        except ValueError:
-            print('Invalid input.')
-
-    config['time'] = time
-    return config
-
-
-def delete_config_option():
-    """
-    Prompts user to delete configuration object from the global config.
-    """
-    print_selected_config()
-    service = -1
-    while service < 0 or service > len(global_config):
-        service = input("Enter the service number to delete: ")
-        try:
-            service = int(service) - 1
-        except ValueError:
-            print("Invalid service number.")
-    del global_config[service]
-    print('Service deleted.')
-
-
-def print_config_list(list: list, new=False):
-    """
-    Print list of options from the config list.
-
-    :param list: list of options from the config object
-    :param new: boolean that indicates to prompt to create a new option.
-    """
-    print('\n')
-    for i in range(len(list)):
-        print(f"\t\t\t{str(i+1)}. {list[i]}")
-
-    if new:
-        print(f"\t\t\t{len(list)+1}. Create new\n")
-
-
-def print_selected_config():
-    """
-    Prints the current global config objects.
-    """
-
-    for i in range(len(global_config)):
-        print(f"===== Service {i+1} =====")
-        print(f"\nService to be tested: {global_config[i]['service']}")
-        print(f"Target server: {global_config[i]['server']}")
-        if 'dns' in global_config[i]:
-            print(f'Public DNS: {global_config[i]["dns"]}')
-            print(f'Domain record type: {global_config[i]["dns_type"]}')
-        if "port" in global_config[i]:
-            print(f'Port number: {global_config[i]["port"]}')
-        if "timeout" in global_config[i]:
-            print(f'Response timeout interval(seconds): {global_config[i]["timeout"]}')
-        print(f"Time interval(seconds): {global_config[i]['time']}\n")
-
-
-def set_config_sequence():
+def set_config_sequence(mgr):
     """
     Creates a new config object by getting user input. 
+    """
+    global config_options 
+    config_options = mgr.config_options
+
+    print("""
+        Create or edit a service or task:
+          
+            1. Service
+            2. Task
+          
+    """)
+    option = 0
+    option = input("Enter a number: ")
+    while option < 1 or option > 2:
+        try: 
+            option = int(option)
+        except ValueError:
+            print("Invalid input.")
+    if option == 1:
+        service_config_sequence()
+    else:
+        task_config_sequence()
+
+
+def service_config_sequence():
+    """
+    Starts input sequence to edit or create service monitor connections.
+    """
+    pass
+
+def task_config_sequence():
+    """
+    Starts inpit sequence to edit or create sertvice tasks.
     """
     config = {}
 
@@ -199,6 +76,40 @@ def set_config_sequence():
 
     config = set_time_interval(config)
 
+    return config
+
+
+def print_config_list(list: list, new=False):
+    """
+    Print list of options from the config list.
+
+    :param list: list of options from the config object
+    :param new: boolean that indicates to prompt to create a new option.
+    """
+    print('\n')
+    for i in range(len(list)):
+        print(f"\t\t\t{str(i+1)}. {list[i]}")
+
+    if new:
+        print(f"\t\t\t{len(list)+1}. Create new\n")
+
+
+def set_time_interval(config):
+    """
+    Prompts user to enter a new time interval for each test.
+    """
+    # Get testing interval for the service
+    time = 0
+    while time < 1:
+        time = input("Enter an interval amount in seconds: ")
+        try:
+            time = int(time)
+            if time < 1:
+                raise ValueError
+        except ValueError:
+            print('Invalid input.')
+
+    config['time'] = time
     return config
 
 
@@ -553,154 +464,3 @@ def create_ip():
     config_options['servers']['ip_address'].append(ip)
     return ip
 
-
-def start_server_in_new_terminal():
-    """
-    Starts the echo server in a new terminal.
-    """
-
-    # Command to start the echo server
-    server_command = 'python Echo_Server.py'
-
-    # Open a new terminal and run the the server
-    if sys.platform.startswith('win'):  # For Windows
-        subprocess.run(['start', 'cmd', '/k', server_command], shell=True)
-    elif sys.platform.startswith('darwin'):  # For macOS
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        server_command = f'cd {dir_path} && source .venv/bin/activate && python Echo_Server.py'
-        tell.app('Terminal', 'do script "' + server_command + '"')
-    elif sys.platform.startswith('linux'):  # For Linux
-        subprocess.run(['x-terminal-emulator', '-e', server_command])
-    else:
-        print("Unsupported platform.")
-
-
-def set_config(config: any):
-    # overwrite configuration in management_service_config.json
-    pass
-
-
-def get_config():
-    # get config object from management_service_config.json
-    pass
-
-
-def reconnect():
-    # handle reconnecting to the service
-    pass
-
-
-def handle_monitoring_services():
-    # worker thread that creates and maintains TCP connections to services
-    pass
-
-
-# TCP Client used to contact TCP Server
-def start_client(message: str):
-
-    # Assign server and port
-    server_address = '127.0.0.1'
-    server_port = 12345
-
-    # Create a Socket:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        # Establish a Connection:
-        sock.connect((server_address, server_port))
-
-        # Send Data:
-        sock.sendall(message.encode())
-
-        # Receive Data:
-        response = sock.recv(1024)
-        return response.decode()
-
-    finally:
-        # Close the Connection:
-        sock.close()
-
-
-def command_line_handler():
-    """
-    Main function to handle user input and manage threads.
-    Uses prompt-toolkit for handling user input with auto-completion and 
-    ensures the prompt stays at the bottom of the terminal.
-    """
-
-    start_server_in_new_terminal()
-
-    banner()
-
-    global global_config
-
-    # Event to signal the worker thread to stop
-    stop_event: threading.Event = threading.Event()
-
-    worker_thread = False
-
-    # Command completer for auto-complete
-    command_completer: WordCompleter = WordCompleter(
-        ['exit', 'test', 'start', 'stop', 'config', 'set', 'delete'], ignore_case=True)
-
-    # Create a prompt session
-    session: PromptSession = PromptSession(completer=command_completer)
-
-    # Variable to control the main loop
-    is_running: bool = True
-
-    try:
-        with patch_stdout():
-            while is_running:
-                # Using prompt-toolkit for input with auto-completion
-                user_input: str = session.prompt("Enter command: ")
-
-                match user_input:
-
-                    case 'start':
-                        # Start continuous tests wtih current configuration
-                        # Create and start the worker thread
-                        stop_event: threading.Event = threading.Event()
-                        for service_config in global_config:
-                            worker_thread: threading.Thread = threading.Thread(
-                                target=worker, args=(stop_event, service_config))      # change worker to the service handler
-                            worker_thread.start()
-
-                    case 'stop':
-                        if worker_thread.is_alive():
-                            stop_event.set()
-                            worker_thread.join()
-                        else:
-                            print("Network tests have not been started.")
-
-                    case 'config':
-                        print_selected_config()
-
-                    case 'set':
-                        global_config.append(set_config_sequence())
-
-                    case 'delete':
-                        delete_config_option()
-
-                    case 'exit':
-                        print("Exiting application...")
-                        start_client('exit')
-                        is_running = False
-
-                    case _:
-                        print("Invalid command.")
-                        print_commands()
-
-    except KeyboardInterrupt:
-        message = tcp_client('exit')
-        print(message)
-
-    finally:
-        # Signal the worker thread to stop and wait for its completion
-        if worker_thread:
-            if worker_thread.is_alive():
-                stop_event.set()
-                worker_thread.join()
-
-if __name__ == "__main__":
-    command_line_handler()

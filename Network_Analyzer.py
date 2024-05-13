@@ -10,8 +10,8 @@ import sys
 import os
 import re
 from applescript import tell
-from timestamp_printing import timestamped_print
-from network_monitoring_functions import ping, traceroute, check_server_http, check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port, check_udp_port, check_echo_server
+from monitoring_service.timestamp_printing import timestamped_print
+from monitoring_service.network_monitoring_functions import ping, traceroute, check_server_http, check_server_https, check_ntp_server, check_dns_server_status, check_tcp_port, check_udp_port, check_echo_server
 
 config_options = {
         "servers": {

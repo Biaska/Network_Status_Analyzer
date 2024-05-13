@@ -1,25 +1,16 @@
 {
-    "monitoring_services_list": {},
-    "default_config": [{
-        "service": "ICMP",
-        "server": "8.8.8.8",
-        "timeout": 1,
-        "time": 2
-    }, {
-        "service": "HTTPS",
-        "server": "https://google.com",
-        "timeout": 2,
-        "time": 3
-    }, {
-        "service": "UDP",
-        "server": "142.251.33.110",
-        "port": 200,
-        "timeout": 4,
-        "time": 5
-    }, {
-        "service": "Echo",
-        "server": "127.0.0.1",
-        "time": 5
+    "monitoring_services_list": [{
+        "id": null,
+        "ip_address": null,
+        "port": null,
+        "tasks": [{
+            "id": null,
+            "config": null
+        }]
+    }],
+    "monitoring_task_list": [{
+        "id": null,
+        "config": {}
     }],
     "config_options": {
         "servers": {
