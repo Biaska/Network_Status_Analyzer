@@ -1,82 +1,88 @@
 import re
-
-def set_config_sequence(mgr):
-    """
-    Creates a new config object by getting user input. 
-    """
-    global config_options 
-    config_options = mgr.config_options
-
-    print("""
-        Create or edit a service or task:
-          
-            1. Service
-            2. Task
-          
-    """)
-    option = 0
-    option = input("Enter a number: ")
-    while option < 1 or option > 2:
-        try: 
-            option = int(option)
-        except ValueError:
-            print("Invalid input.")
-    if option == 1:
-        service_config_sequence()
-    else:
-        task_config_sequence()
+import os
+import base64
 
 
-def service_config_sequence():
+def service_config_sequence(options):
     """
     Starts input sequence to edit or create service monitor connections.
     """
-    pass
+    global config_options
+    config_options = options
+    ip_address = create_ip()
+    port = create_port()
+    service = {
+        'id': unique_id(),
+        'ip_address': ip_address,
+        "port": port,
+        "changed": False,
+        "status": False,
+        "initialized": True,
+        "status_number": 0,
+        "tasks": []
+    }
+    return service
 
-def task_config_sequence():
+def task_config_sequence(config):
     """
-    Starts inpit sequence to edit or create sertvice tasks.
+    Starts input sequence to edit or create service tasks.
+    :returns: full config object for a single task
     """
-    config = {}
+    global config_options
+    config_options = config['config_options']
+
+    task_config = {}
 
     # Get service index from user and check for valid input
     service = select_from_config_list(config_options['services'])
 
-    config['service'] = service
+    task_config['service'] = service
 
     # Get server option from user and check for valid input
-    match config['service']:
+    match task_config['service']:
 
         case 'HTTP':
-            config = select_HTTP(config)
+            task_config = select_HTTP(task_config)
 
         case 'HTTPS':
-            config = select_HTTPS(config)
+            task_config = select_HTTPS(task_config)
 
         case 'ICMP':
-            config = select_ICMP(config)
+            task_config = select_ICMP(task_config)
 
         case 'DNS':
-            config = select_DNS(config)
+            task_config = select_DNS(task_config)
 
         case 'NTP':
-            config = select_NTP(config)
+            task_config = select_NTP(task_config)
 
         case 'TCP':
-            config = select_TCP(config)
+            task_config = select_TCP(task_config)
 
         case 'UDP':
-            config = select_UDP(config)
+            task_config = select_UDP(task_config)
 
         case 'ECHO':
-            config = {
+            task_config = {
                 "service": "ECHO",
                 "server": '127.0.0.1'
             }
 
-    config = set_time_interval(config)
+    task_config = set_time_interval(task_config)
 
-    return config
+    task_config = {
+        "id": unique_id(),
+        "config": task_config
+    }
+
+    # update new selections
+    config['config_options'] = config_options
+
+    return config, task_config
+
+
+def unique_id():
+    return base64.b64encode(os.urandom(6)).decode('ascii')
 
 
 def print_config_list(list: list, new=False):

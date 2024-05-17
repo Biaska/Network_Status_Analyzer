@@ -1,0 +1,43 @@
+{
+    "id": "k78NnaNa",
+    "ip_address": "127.0.0.1",
+    "port": 12345,
+    "status_number": 0,
+    "tasks": [
+        {
+            "id": "iaj8JZQZ",
+            "config": {
+                "service": "HTTPS",
+                "server": "https://adobe.com",
+                "timeout": 3,
+                "time": 2
+            }
+        },
+        {
+            "id": "4HwPyl3q",
+            "config": {
+                "service": "DNS",
+                "server": "adobe.com",
+                "dns": [
+                    "Cloudfare DNS",
+                    "1.1.1.1"
+                ],
+                "dns_type": "A",
+                "time": 2
+            }
+        },
+        {
+            "id": "p04OuqN3",
+            "config": {
+                "service": "DNS",
+                "server": "youtube.com",
+                "dns": [
+                    "Quad9DNS",
+                    "9.9.9.9"
+                ],
+                "dns_type": "A",
+                "time": 2
+            }
+        }
+    ]
+}

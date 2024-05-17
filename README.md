@@ -8,9 +8,17 @@ Install the required packages(Recommended to install inside a virtual environmen
 
 `pip install -r requirements.txt`
 
-Run the main file: 
+Run the management service in one terminal:
 
-`sudo python Network_Analyzer.py`
+`cd management_service`
+
+`sudo python management_service.py`
+
+Run the monitor service in another terminal and specify a server address, and port:
+
+`cd monitoring_service`
+
+`sudo python monitoring_service.py 127.0.0.1 12345`
 
 ## Start Screen
 

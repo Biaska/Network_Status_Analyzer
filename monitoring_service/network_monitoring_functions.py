@@ -19,7 +19,6 @@ import dns.exception
 from socket import gaierror
 from time import ctime
 from typing import Tuple, Optional, Any
-from Echo_Client import tcp_client
 
 
 def calculate_icmp_checksum(data: bytes) -> int:

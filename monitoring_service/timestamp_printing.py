@@ -3,7 +3,7 @@
 import datetime
 
 
-def timestamped_print(*args, **kwargs):
+def timestamped_string(string):
     """
     Custom print function that adds a timestamp to the beginning of the message.
 
@@ -15,4 +15,4 @@ def timestamped_print(*args, **kwargs):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Print the timestamp followed by the original message
-    print(f"[{timestamp}]: ", *args, **kwargs)
+    return f"[{timestamp}]: {string}"

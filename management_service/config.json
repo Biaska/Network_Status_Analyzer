@@ -1,27 +1,195 @@
 {
-    "monitoring_services_list": [{
-        "id": null,
-        "ip_address": null,
-        "port": null,
-        "tasks": [{
-            "id": null,
-            "config": null
-        }]
-    }],
-    "monitoring_task_list": [{
-        "id": null,
-        "config": {}
-    }],
+    "monitoring_services_list": [
+        {
+            "id": "k78NnaNa",
+            "ip_address": "127.0.0.1",
+            "port": 12345,
+            "changed": true,
+            "status": false,
+            "status_number": 0,
+            "initialized": true,
+            "tasks": [
+                {
+                    "id": "iaj8JZQZ",
+                    "config": {
+                        "service": "HTTPS",
+                        "server": "https://adobe.com",
+                        "timeout": 3,
+                        "time": 2
+                    }
+                },
+                {
+                    "id": "4HwPyl3q",
+                    "config": {
+                        "service": "DNS",
+                        "server": "adobe.com",
+                        "dns": [
+                            "Cloudfare DNS",
+                            "1.1.1.1"
+                        ],
+                        "dns_type": "A",
+                        "time": 2
+                    }
+                },
+                {
+                    "id": "p04OuqN3",
+                    "config": {
+                        "service": "DNS",
+                        "server": "youtube.com",
+                        "dns": [
+                            "Quad9DNS",
+                            "9.9.9.9"
+                        ],
+                        "dns_type": "A",
+                        "time": 2
+                    }
+                }
+            ]
+        }
+    ],
+    "monitoring_task_list": [
+        {
+            "id": "mYyWkKfQ",
+            "config": {
+                "service": "HTTPS",
+                "server": "https://google.com",
+                "timeout": 1,
+                "time": 2
+            }
+        },
+        {
+            "id": "7bTz8n+h",
+            "config": {
+                "service": "HTTPS",
+                "server": "https://google.com",
+                "timeout": 3,
+                "time": 2
+            }
+        },
+        {
+            "id": "ohpttvJ/",
+            "config": {
+                "service": "HTTPS",
+                "server": "https://google.com",
+                "timeout": 3,
+                "time": 3
+            }
+        },
+        {
+            "id": "4HwPyl3q",
+            "config": {
+                "service": "DNS",
+                "server": "adobe.com",
+                "dns": [
+                    "Cloudfare DNS",
+                    "1.1.1.1"
+                ],
+                "dns_type": "A",
+                "time": 2
+            }
+        },
+        {
+            "id": "iaj8JZQZ",
+            "config": {
+                "service": "HTTPS",
+                "server": "https://adobe.com",
+                "timeout": 3,
+                "time": 2
+            }
+        },
+        {
+            "id": "p04OuqN3",
+            "config": {
+                "service": "DNS",
+                "server": "youtube.com",
+                "dns": [
+                    "Quad9DNS",
+                    "9.9.9.9"
+                ],
+                "dns_type": "A",
+                "time": 2
+            }
+        },
+        {
+            "id": "fJOa7bUD",
+            "config": {
+                "service": "HTTP",
+                "server": "http://google.com",
+                "time": 1
+            }
+        }
+    ],
     "config_options": {
         "servers": {
-            "ip_address": ["8.8.8.8", "23.41.4.216", "142.251.33.110"],
-            "http": ["http://google.com", "http://adobe.com", "http://youtube.com"],
-            "https": ["https://google.com", "https://adobe.com", "https://youtube.com"],
-            "hostname": ["google.com", "adobe.com", "youtube.com"],
-            "port": [200, 300, 400],
-            "dns": [["Google DNS", "8.8.8.8"], ["Cloudfare DNS", "1.1.1.1"], ["Quad9DNS", "9.9.9.9"], ["OpenDNS", "208.67.222.222"]],
-            "dns_types": ["A", "MX", "AAAA", "CNAME"]
+            "ip_address": [
+                "8.8.8.8",
+                "23.41.4.216",
+                "142.251.33.110",
+                "127.0.0.1",
+                "127.0.0.1",
+                "127.0.0.1",
+                "127.0.0.1",
+                "127.0.0.2"
+            ],
+            "http": [
+                "http://google.com",
+                "http://adobe.com",
+                "http://youtube.com"
+            ],
+            "https": [
+                "https://google.com",
+                "https://adobe.com",
+                "https://youtube.com"
+            ],
+            "hostname": [
+                "google.com",
+                "adobe.com",
+                "youtube.com"
+            ],
+            "port": [
+                200,
+                300,
+                400,
+                12345,
+                12345,
+                12345,
+                12345,
+                12345
+            ],
+            "dns": [
+                [
+                    "Google DNS",
+                    "8.8.8.8"
+                ],
+                [
+                    "Cloudfare DNS",
+                    "1.1.1.1"
+                ],
+                [
+                    "Quad9DNS",
+                    "9.9.9.9"
+                ],
+                [
+                    "OpenDNS",
+                    "208.67.222.222"
+                ]
+            ],
+            "dns_types": [
+                "A",
+                "MX",
+                "AAAA",
+                "CNAME"
+            ]
         },
-        "services": ["HTTP", "HTTPS", "ICMP", "DNS", "NTP", "TCP", "UDP", "ECHO"]
+        "services": [
+            "HTTP",
+            "HTTPS",
+            "ICMP",
+            "DNS",
+            "NTP",
+            "TCP",
+            "UDP",
+            "ECHO"
+        ]
     }
 }
